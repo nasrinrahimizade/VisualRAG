@@ -1,3 +1,4 @@
+#  Generating Answers with Citations
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -44,7 +45,7 @@ def build_rag_chain(vector_store):
     """Build the RAG chain using the modern LangChain approach."""
     llm = load_llm()
     prompt = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
-    retriever = vector_store.as_retriever(search_kwargs={"k": 5})
+    retriever = vector_store.as_retriever(search_kwargs={"k": 7})
 
     rag_chain = (
         {

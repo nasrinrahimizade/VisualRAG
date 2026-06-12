@@ -1,3 +1,5 @@
+# This file handles converting chunks into vectors and storing/retrieving them.
+
 import os
 from pathlib import Path
 from dotenv import load_dotenv
