@@ -95,11 +95,11 @@ def get_or_build_vector_store(papers_dir: str = None) -> Chroma:
 
 def query(vector_store: Chroma, text: str, n_results: int = 5, source_filter: str = None) -> list:
     if source_filter:
-        results = vector_store.similarity_search(
+        results = vector_store.max_marginal_relevance_search(
             text, k=n_results, filter={"source": source_filter}
         )
     else:
-        results = vector_store.similarity_search(text, k=n_results)
+        results = vector_store.max_marginal_relevance_search(text, k=n_results)
     return results
 
 

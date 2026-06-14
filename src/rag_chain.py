@@ -45,7 +45,7 @@ def build_rag_chain(vector_store):
     """Build the RAG chain using the modern LangChain approach."""
     llm = load_llm()
     prompt = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
-    retriever = vector_store.as_retriever(search_kwargs={"k": 7})
+    retriever = vector_store.as_retriever(search_type='mmr' , search_kwargs={"k": 5, "fetch_key": 15})
 
     rag_chain = (
         {
