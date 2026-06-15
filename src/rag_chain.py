@@ -6,6 +6,9 @@ from langchain_groq import ChatGroq
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnablePassthrough
+from image_captioner import caption_image, load_captioner
+# from langchain_classic.memory import ConversationBufferMemory
+# from langchain_classic.chains import ConversationalRetrievalChain
 
 load_dotenv(Path(__file__).parent.parent / ".env")
 
@@ -45,8 +48,21 @@ def build_rag_chain(vector_store):
     """Build the RAG chain using the modern LangChain approach."""
     llm = load_llm()
     prompt = ChatPromptTemplate.from_template(PROMPT_TEMPLATE)
-    retriever = vector_store.as_retriever(search_type='mmr' , search_kwargs={"k": 5, "fetch_key": 15})
+    retriever = vector_store.as_retriever(search_type='mmr' , search_kwargs={"k": 4, "fetch_k": 15})
 
+    # memory = ConversationBufferMemory(
+    #     memory_key="chat_history",
+    #     return_messages=True, 
+    #     output_key = "answer"
+    # )
+
+    # chain = ConversationalRetrievalChain.from_llm( 
+    #     llm = llm,
+    #     retriever = retriever,
+    #     memory = memory ,
+    #     return_source_documents=True,
+    #     combine_docs_chain_kwargs={"prompt": ChatPromptTemplate.from_template(PROMPT_TEMPLATE)}
+    # )
     rag_chain = (
         {
             "context": retriever | format_docs,
@@ -67,6 +83,7 @@ def ask(rag_chain, retriever, question: str) -> dict:
 
     # Get source documents separately
     source_docs = retriever.invoke(question)
+    # source_docs = result.get("source_documents", [])
 
     sources = []
     seen = set()
@@ -101,6 +118,13 @@ def print_answer(result: dict):
         print(f"\n[{i}] {src['source']} — Page {src['page']}")
         print(f"    {src['preview']}...")
 
+def ask_from_image(image_path, chain, retriever, processor, model):
+    """Ask a question based on an uploaded image."""
+    caption_text = caption_image(image_path, processor, model)
+    query = f"Computer vision and robotics research related to: {caption_text}"
+    result = ask(chain, retriever, query)
+    result["caption"] = caption_text
+    return result
 
 if __name__ == "__main__":
     import sys

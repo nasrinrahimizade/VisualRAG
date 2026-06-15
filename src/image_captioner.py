@@ -1,4 +1,11 @@
 
+import os
+from pathlib import Path
+from dotenv import load_dotenv
+
+load_dotenv(Path(__file__).parent.parent / ".env")
+os.environ["HF_HOME"] = os.getenv("HF_HOME", "E:\\huggingface_cache")
+
 from transformers import Blip2Processor, Blip2ForConditionalGeneration
 from PIL import Image
 import torch
