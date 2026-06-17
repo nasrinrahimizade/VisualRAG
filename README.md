@@ -225,12 +225,7 @@ Most RAG demos are text-only and use toy datasets. VisualRAG is built on a real 
 - **Grounded prompt** — forces citations and prevents hallucination
 - **LaTeX cleaning** — removes encoded math from PDF chunks that pollute retrieval
 
----
 
-## Author
-
-**Your Name**
-[LinkedIn](https://linkedin.com/in/yourprofile) · [GitHub](https://github.com/yourusername)
 
 
 ![alt text](image.png)
