@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
+import re
 
 
 def load_and_chunk_papers(papers_dir: str = "data/papers") -> list:
@@ -32,8 +33,12 @@ def load_and_chunk_papers(papers_dir: str = "data/papers") -> list:
             pages = loader.load()
             chunks = splitter.split_documents(pages)
             for chunk in chunks:
+                chunk.page_content = clean_chunk_text(chunk.page_content)
                 chunk.metadata["source"] = pdf_path.name
                 chunk.metadata["page"] = chunk.metadata.get("page", 0)
+
+            # Filter out chunks that became too short after cleaning
+            chunks = [c for c in chunks if len(c.page_content) > 100]
             all_chunks.extend(chunks)
         except Exception as e:
             print(f"  WARNING: Could not process {pdf_path.name}: {e}")
@@ -41,6 +46,18 @@ def load_and_chunk_papers(papers_dir: str = "data/papers") -> list:
 
     print(f"\nDone. Total chunks: {len(all_chunks)}")
     return all_chunks
+
+
+def clean_chunk_text(text: str) -> str:
+    """Remove LaTeX encoding and other noise from PDF chunks."""
+    # Remove LaTeX encoded strings like <latexit sha1_base64="...">...</latexit>
+    text = re.sub(r'<latexit[^>]*>.*?</latexit>', '', text, flags=re.DOTALL)
+    # Remove leftover base64 garbage
+    text = re.sub(r'[A-Za-z0-9+/]{50,}={0,2}', '', text)
+    # Remove excessive whitespace
+    text = re.sub(r'\n{3,}', '\n\n', text)
+    text = re.sub(r' {3,}', ' ', text)
+    return text.strip()
 
 
 if __name__ == "__main__":
